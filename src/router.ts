@@ -10,10 +10,17 @@ export function createRouter() {
   function handlerFn(ctx: Ctx) {
     console.debug(stack);
     for (let i = 0; i < stack.length; i++) {
-      const reqPathname = new URL(ctx.req.url).pathname;
       const layer = stack[i];
-      /** TODO needs to support first segment matching */
-      if (layer.pathname === "/" || layer.pathname === reqPathname) {
+      const layerPathnamePattern = new URLPattern({
+        pathname: ctx.req.parentPathname + layer.pathname,
+      });
+      if (layerPathnamePattern.test(ctx.req.url)) {
+        /**
+         * TODO
+         * This does not work correctly as it appends
+         * paths unnecessarily
+         */
+        ctx.req.parentPathname = ctx.req.parentPathname + layer.pathname;
         layer.handlerFn(ctx);
       }
     }
