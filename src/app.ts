@@ -23,18 +23,18 @@ export function createApp() {
 
   function use(...middlewareFns: MiddlewareFn[]): void;
   function use(...routerHandlerFns: MiddlewareFn[]): void;
-  function use(path: string, ...fns: MiddlewareFn[]): void;
+  function use(pathname: string, ...fns: MiddlewareFn[]): void;
   function use(
-    pathOrMiddlewareFn: string | MiddlewareFn,
+    pathnameOrMiddlewareFn: string | MiddlewareFn,
     ...fns: MiddlewareFn[]
   ): void {
     if (!appRouter) {
       appRouter = createRouter();
     }
-    if (typeof pathOrMiddlewareFn === "string") {
-      appRouter.use(pathOrMiddlewareFn, ...fns);
+    if (typeof pathnameOrMiddlewareFn === "string") {
+      appRouter.use(pathnameOrMiddlewareFn, ...fns);
     } else {
-      appRouter.use(pathOrMiddlewareFn, ...fns);
+      appRouter.use(pathnameOrMiddlewareFn, ...fns);
     }
   }
 

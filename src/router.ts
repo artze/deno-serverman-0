@@ -10,34 +10,34 @@ export function createRouter() {
   function handlerFn(ctx: Ctx) {
     console.debug(stack);
     for (let i = 0; i < stack.length; i++) {
-      const reqPath = new URL(ctx.req.url).pathname;
+      const reqPathname = new URL(ctx.req.url).pathname;
       const layer = stack[i];
       /** TODO needs to support first segment matching */
-      if (layer.path === "/" || layer.path === reqPath) {
+      if (layer.pathname === "/" || layer.pathname === reqPathname) {
         layer.handlerFn(ctx);
       }
     }
   }
 
   function use(...fns: MiddlewareFn[]): void;
-  function use(path: string, ...fns: MiddlewareFn[]): void;
+  function use(pathname: string, ...fns: MiddlewareFn[]): void;
   function use(
-    pathOrMiddlewareFn: string | MiddlewareFn,
+    pathnameOrMiddlewareFn: string | MiddlewareFn,
     ...fns: MiddlewareFn[]
   ): void {
-    let path = "/";
+    let pathname = "*";
     const middlewareFns: MiddlewareFn[] = [];
-    if (typeof pathOrMiddlewareFn === "string") {
-      path = pathOrMiddlewareFn;
+    if (typeof pathnameOrMiddlewareFn === "string") {
+      pathname = `${pathnameOrMiddlewareFn}/*`;
       middlewareFns.push(...fns);
     } else {
-      middlewareFns.push(pathOrMiddlewareFn);
+      middlewareFns.push(pathnameOrMiddlewareFn);
       if (fns.length > 0) {
         middlewareFns.push(...fns);
       }
     }
     for (let i = 0; i < middlewareFns.length; i++) {
-      stack.push(createLayer(path, middlewareFns[i]));
+      stack.push(createLayer(pathname, middlewareFns[i]));
     }
   }
 

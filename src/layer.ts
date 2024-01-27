@@ -2,12 +2,12 @@ import type { MiddlewareFn } from "./app.ts";
 
 export interface Layer {
   handlerFn: MiddlewareFn;
-  path: string;
+  pathname: string;
 }
 
-export function createLayer(path: string, handlerFn: MiddlewareFn): Layer {
+export function createLayer(pathname: string, handlerFn: MiddlewareFn): Layer {
   return {
-    path,
+    pathname,
     handlerFn,
   };
 }
