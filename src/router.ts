@@ -8,7 +8,7 @@ export function createRouter() {
   const stack: Layer[] = [];
 
   function handlerFn(ctx: Ctx) {
-    console.log(stack);
+    console.debug(stack);
     for (let i = 0; i < stack.length; i++) {
       const reqPath = new URL(ctx.req.url).pathname;
       const layer = stack[i];
