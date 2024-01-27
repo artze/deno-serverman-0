@@ -1,0 +1,8 @@
+{
+  "imports": {
+    "@src/": "./src/"
+  },
+  "tasks": {
+    "dev": "deno run --allow-net --watch consumer.ts"
+  }
+}
