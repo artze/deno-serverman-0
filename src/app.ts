@@ -1,7 +1,7 @@
 import { Router, createRouter } from "@src/router.ts";
 import { Ctx, createCtx } from "@src/ctx.ts";
 
-export type MiddlewareFn = (ctx: Ctx) => void;
+export type RequestHandlerFn = (ctx: Ctx) => void;
 
 export function createApp() {
   let appRouter: Router;
@@ -21,20 +21,19 @@ export function createApp() {
     Deno.serve({ port }, appHandlerFn);
   }
 
-  function use(...middlewareFns: MiddlewareFn[]): void;
-  function use(...routerHandlerFns: MiddlewareFn[]): void;
-  function use(pathname: string, ...fns: MiddlewareFn[]): void;
+  function use(...fns: RequestHandlerFn[]): void;
+  function use(pathname: string, ...fns: RequestHandlerFn[]): void;
   function use(
-    pathnameOrMiddlewareFn: string | MiddlewareFn,
-    ...fns: MiddlewareFn[]
+    pathnameOrFn: string | RequestHandlerFn,
+    ...fns: RequestHandlerFn[]
   ): void {
     if (!appRouter) {
       appRouter = createRouter();
     }
-    if (typeof pathnameOrMiddlewareFn === "string") {
-      appRouter.use(pathnameOrMiddlewareFn, ...fns);
+    if (typeof pathnameOrFn === "string") {
+      appRouter.use(pathnameOrFn, ...fns);
     } else {
-      appRouter.use(pathnameOrMiddlewareFn, ...fns);
+      appRouter.use(pathnameOrFn, ...fns);
     }
   }
 

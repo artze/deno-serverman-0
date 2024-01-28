@@ -1,4 +1,4 @@
-import { MiddlewareFn } from "@src/app.ts";
+import { RequestHandlerFn } from "@src/app.ts";
 import { Ctx } from "@src/ctx.ts";
 import { Layer, createLayer } from "@src/layer.ts";
 
@@ -22,19 +22,19 @@ export function createRouter() {
     }
   }
 
-  function use(...fns: MiddlewareFn[]): void;
-  function use(pathname: string, ...fns: MiddlewareFn[]): void;
+  function use(...fns: RequestHandlerFn[]): void;
+  function use(pathname: string, ...fns: RequestHandlerFn[]): void;
   function use(
-    pathnameOrMiddlewareFn: string | MiddlewareFn,
-    ...fns: MiddlewareFn[]
+    pathnameOrFn: string | RequestHandlerFn,
+    ...fns: RequestHandlerFn[]
   ): void {
     let pathname = "*";
-    const middlewareFns: MiddlewareFn[] = [];
-    if (typeof pathnameOrMiddlewareFn === "string") {
-      pathname = `${pathnameOrMiddlewareFn}*`;
+    const middlewareFns: RequestHandlerFn[] = [];
+    if (typeof pathnameOrFn === "string") {
+      pathname = `${pathnameOrFn}*`;
       middlewareFns.push(...fns);
     } else {
-      middlewareFns.push(pathnameOrMiddlewareFn);
+      middlewareFns.push(pathnameOrFn);
       if (fns.length > 0) {
         middlewareFns.push(...fns);
       }

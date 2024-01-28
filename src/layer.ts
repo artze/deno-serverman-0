@@ -1,11 +1,14 @@
-import type { MiddlewareFn } from "./app.ts";
+import type { RequestHandlerFn } from "./app.ts";
 
 export interface Layer {
-  handlerFn: MiddlewareFn;
+  handlerFn: RequestHandlerFn;
   pathname: string;
 }
 
-export function createLayer(pathname: string, handlerFn: MiddlewareFn): Layer {
+export function createLayer(
+  pathname: string,
+  handlerFn: RequestHandlerFn
+): Layer {
   return {
     pathname,
     handlerFn,
