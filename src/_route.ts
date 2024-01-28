@@ -8,7 +8,7 @@ export function createRoute(fns: RequestHandlerFn[]) {
     stack.push(createLayer("*", fns[i]));
   }
 
-  function handleFn(ctx: Ctx) {
+  function handlerFn(ctx: Ctx) {
     console.debug(stack);
     for (let i = 0; i < stack.length; i++) {
       stack[i].handlerFn(ctx);
@@ -16,6 +16,6 @@ export function createRoute(fns: RequestHandlerFn[]) {
   }
 
   return {
-    handleFn,
+    handlerFn,
   };
 }

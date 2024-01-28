@@ -33,7 +33,7 @@ export function createRouter(): Router {
       ...fns: RequestHandlerFn[]
     ) {
       const route = createRoute(fns);
-      stack.push(createLayer(pathname, route.handleFn, m));
+      stack.push(createLayer(pathname, route.handlerFn, m));
     };
   });
 
