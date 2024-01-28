@@ -15,12 +15,8 @@ export function createRouter() {
         pathname: ctx.req.parentPathname + layer.pathname,
       });
       if (layerPathnamePattern.test(ctx.req.url)) {
-        /**
-         * TODO
-         * This does not work correctly as it appends
-         * paths unnecessarily
-         */
-        ctx.req.parentPathname = ctx.req.parentPathname + layer.pathname;
+        ctx.req.parentPathname =
+          ctx.req.parentPathname + layer.pathname.replace("*", "");
         layer.handlerFn(ctx);
       }
     }
@@ -35,7 +31,7 @@ export function createRouter() {
     let pathname = "*";
     const middlewareFns: MiddlewareFn[] = [];
     if (typeof pathnameOrMiddlewareFn === "string") {
-      pathname = `${pathnameOrMiddlewareFn}/*`;
+      pathname = `${pathnameOrMiddlewareFn}*`;
       middlewareFns.push(...fns);
     } else {
       middlewareFns.push(pathnameOrMiddlewareFn);
