@@ -1,8 +1,10 @@
-import { RequestHandlerFn } from "@src/app.ts";
 import { Ctx } from "@src/_ctx.ts";
 import { Layer, createLayer } from "@src/_layer.ts";
+import { createRoute } from "@src/_route.ts";
+import type { RequestHandlerFn } from "@src/app.ts";
 
 export type Router = ReturnType<typeof createRouter>;
+export type Method = "DELETE" | "GET" | "PATCH" | "POST" | "PUT";
 
 export function createRouter() {
   const stack: Layer[] = [];
@@ -14,11 +16,15 @@ export function createRouter() {
       const layerPathnamePattern = new URLPattern({
         pathname: ctx.req.parentPathname + layer.pathname,
       });
-      if (layerPathnamePattern.test(ctx.req.url)) {
-        ctx.req.parentPathname =
-          ctx.req.parentPathname + layer.pathname.replace("*", "");
-        layer.handlerFn(ctx);
+      if (!layerPathnamePattern.test(ctx.req.url)) {
+        continue;
       }
+      if (layer.method && ctx.req.method.toUpperCase() !== layer.method) {
+        continue;
+      }
+      ctx.req.parentPathname =
+        ctx.req.parentPathname + layer.pathname.replace("*", "");
+      layer.handlerFn(ctx);
     }
   }
 
@@ -44,7 +50,13 @@ export function createRouter() {
     }
   }
 
+  function get(pathname: string, ...fns: RequestHandlerFn[]) {
+    const route = createRoute(fns);
+    stack.push(createLayer(pathname, route.handleFn, "GET"));
+  }
+
   return {
+    get,
     use,
     handlerFn,
   };

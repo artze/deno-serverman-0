@@ -1,16 +1,20 @@
 import type { RequestHandlerFn } from "./app.ts";
+import type { Method } from "@src/router.ts";
 
 export interface Layer {
   handlerFn: RequestHandlerFn;
   pathname: string;
+  method?: Method;
 }
 
 export function createLayer(
   pathname: string,
-  handlerFn: RequestHandlerFn
+  handlerFn: RequestHandlerFn,
+  method?: Method
 ): Layer {
-  return {
-    pathname,
-    handlerFn,
-  };
+  const layer: Layer = { pathname, handlerFn };
+  if (method) {
+    layer.method = method;
+  }
+  return layer;
 }
