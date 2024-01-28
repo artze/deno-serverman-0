@@ -1,5 +1,5 @@
 import { Router, createRouter } from "@src/router.ts";
-import { Ctx, createCtx } from "@src/ctx.ts";
+import { Ctx, createCtx } from "@src/_ctx.ts";
 
 export type RequestHandlerFn = (ctx: Ctx) => void;
 
