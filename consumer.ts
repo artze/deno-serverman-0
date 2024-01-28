@@ -17,6 +17,9 @@ catRouter.use((ctx) => {
 catRouter.use("/calico", () => {
   console.log("Calico cat router");
 });
+catRouter.get("/calico/:id", () => {
+  console.log("Calico cat :id route");
+});
 
 const dogRouter = serverman.createRouter();
 dogRouter.use((ctx) => {
