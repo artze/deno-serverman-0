@@ -1,4 +1,3 @@
-import { createApp } from "@src/app.ts";
-import { createRouter } from "@src/router.ts";
-
-export const serverman = { createApp, createRouter };
+export { createApp } from "@src/app.ts";
+export { createRouter } from "@src/router.ts";
+export type { Router } from "@src/router.ts";

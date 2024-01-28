@@ -1,4 +1,4 @@
-import { serverman } from "@src/mod.ts";
+import * as serverman from "@src/mod.ts";
 
 const app = serverman.createApp();
 
