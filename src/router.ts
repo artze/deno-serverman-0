@@ -23,6 +23,47 @@ export type Router = {
 const methods = ["DELETE", "GET", "PATCH", "POST", "PUT"] as const;
 export type Method = typeof methods[number];
 
+/**
+ * TODO
+ * Do we need to deal with this edge case?
+ * router.use('/calico/xyz', () => {})
+ * router.get('/calico/:id', () => {})
+ */
+export function matchRoute({
+  layerPathname,
+  parentPathname,
+  reqUrl,
+}: {
+  layerPathname: string;
+  parentPathname: string;
+  reqUrl: string;
+}): boolean {
+  const layerPathnameArr = layerPathname.split("/").filter((s) => s !== "");
+  const parentPathnameArr = parentPathname.split("/").filter((s) => s !== "");
+  let counter = 0;
+  for (let i = 1; i < layerPathnameArr.length; i++) {
+    if (
+      layerPathnameArr.slice(0, i).join("/") ===
+      parentPathnameArr.slice(-i).join("/")
+    ) {
+      counter = i;
+      break;
+    }
+  }
+  const trimmedLayerPathname = layerPathnameArr.slice(counter).join("/");
+  let combinedPathname;
+  if (trimmedLayerPathname === "*") {
+    combinedPathname = parentPathname + trimmedLayerPathname;
+  } else {
+    combinedPathname = parentPathname + "/" + trimmedLayerPathname;
+  }
+  const layerPathnamePattern = new URLPattern({
+    pathname: combinedPathname,
+  });
+
+  return layerPathnamePattern.test(reqUrl);
+}
+
 export function createRouter(): Router {
   const stack: Layer[] = [];
 
@@ -41,10 +82,13 @@ export function createRouter(): Router {
     console.debug(stack);
     for (let i = 0; i < stack.length; i++) {
       const layer = stack[i];
-      const layerPathnamePattern = new URLPattern({
-        pathname: ctx.req.parentPathname + layer.pathname,
-      });
-      if (!layerPathnamePattern.test(ctx.req.url)) {
+      if (
+        !matchRoute({
+          layerPathname: layer.pathname,
+          parentPathname: ctx.req.parentPathname,
+          reqUrl: ctx.req.url,
+        })
+      ) {
         continue;
       }
       if (layer.method && ctx.req.method.toUpperCase() !== layer.method) {
