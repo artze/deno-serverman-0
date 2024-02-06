@@ -41,7 +41,7 @@ export function matchRoute({
   const layerPathnameArr = layerPathname.split("/").filter((s) => s !== "");
   const parentPathnameArr = parentPathname.split("/").filter((s) => s !== "");
   let counter = 0;
-  for (let i = 1; i < layerPathnameArr.length; i++) {
+  for (let i = 1; i <= layerPathnameArr.length; i++) {
     if (
       layerPathnameArr.slice(0, i).join("/") ===
       parentPathnameArr.slice(-i).join("/")
