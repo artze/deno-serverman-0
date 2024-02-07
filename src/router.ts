@@ -38,7 +38,14 @@ export function matchRoute({
   parentPathname: string;
   reqUrl: string;
 }): boolean {
-  const layerPathnameArr = layerPathname.split("/").filter((s) => s !== "");
+  const strMatchResult = layerPathname.match(/([^*]*)(\*$)?/);
+  if (!strMatchResult) {
+    throw new Error("layerPathname cannot be parsed");
+  }
+  const [, layerPathnameWithoutAsterisk, asterisk] = strMatchResult;
+  const layerPathnameArr = layerPathnameWithoutAsterisk
+    .split("/")
+    .filter((s) => s !== "");
   const parentPathnameArr = parentPathname.split("/").filter((s) => s !== "");
   let counter = 0;
   for (let i = 1; i <= layerPathnameArr.length; i++) {
@@ -50,15 +57,13 @@ export function matchRoute({
       break;
     }
   }
-  const trimmedLayerPathname = layerPathnameArr.slice(counter).join("/");
-  let combinedPathname;
-  if (trimmedLayerPathname === "*") {
-    combinedPathname = parentPathname + trimmedLayerPathname;
-  } else {
-    combinedPathname = parentPathname + "/" + trimmedLayerPathname;
+  let processedLayerPathname = layerPathnameArr.slice(counter).join("/");
+  if (processedLayerPathname.length > 0) {
+    processedLayerPathname = "/" + processedLayerPathname;
   }
   const layerPathnamePattern = new URLPattern({
-    pathname: combinedPathname,
+    pathname:
+      parentPathname + processedLayerPathname + (asterisk ? asterisk : ""),
   });
 
   return layerPathnamePattern.test(reqUrl);
