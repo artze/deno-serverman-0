@@ -84,7 +84,6 @@ export function createRouter(): Router {
   });
 
   function handlerFn(ctx: Ctx) {
-    console.debug(stack);
     for (let i = 0; i < stack.length; i++) {
       const layer = stack[i];
       if (
