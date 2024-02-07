@@ -41,13 +41,20 @@ Deno.test("matchRoute()", async (t) => {
     },
     {
       name: "no intersections - with wildcard 3",
+      layerPathname: "/calico*",
+      parentPathname: "/cat",
+      reqUrl: "http://abc.com/cat/calico/foobar",
+      expected: true,
+    },
+    {
+      name: "no intersections - with wildcard 4",
       layerPathname: "/calico/:id",
       parentPathname: "/cat",
       reqUrl: "http://abc.com/cat/calico/3",
       expected: true,
     },
     {
-      name: "no intersections - with wildcard 4",
+      name: "no intersections - with wildcard 5",
       layerPathname: "/calico*",
       parentPathname: "/cat",
       reqUrl: "http://abc.com/cat",
@@ -85,8 +92,22 @@ Deno.test("matchRoute()", async (t) => {
       name: "with intersections - with wildcard 2",
       layerPathname: "/calico/profile*",
       parentPathname: "/cat/calico/profile",
+      reqUrl: "http://abc.com/cat/calico/profile",
+      expected: true,
+    },
+    {
+      name: "with intersections - with wildcard 3",
+      layerPathname: "/calico/profile*",
+      parentPathname: "/cat/calico/profile",
       reqUrl: "http://abc.com/cat/calico/profile/name",
       expected: true,
+    },
+    {
+      name: "with intersections - with wildcard 4",
+      layerPathname: "/calico/profile*",
+      parentPathname: "/cat/calico/profile",
+      reqUrl: "http://abc.com/cat/calico",
+      expected: false,
     },
   ];
   for (const testCase of testCases) {
