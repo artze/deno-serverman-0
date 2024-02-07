@@ -9,7 +9,6 @@ export function createRoute(fns: RequestHandlerFn[]) {
   }
 
   function handlerFn(ctx: Ctx) {
-    console.debug(stack);
     for (let i = 0; i < stack.length; i++) {
       stack[i].handlerFn(ctx);
     }
