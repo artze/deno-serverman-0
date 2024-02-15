@@ -139,6 +139,12 @@ function createMockCtx(pathname: string, method: Method): Ctx {
   } as Ctx;
 }
 
+function asyncOp() {
+  return new Promise(function (resolve) {
+    setTimeout(resolve, 0);
+  });
+}
+
 Deno.test(
   {
     name: "router.use() without path",
@@ -314,3 +320,22 @@ Deno.test(
     assertEquals(callLog, [0, 1, 3]);
   }
 );
+
+Deno.test({ name: "router with async requestHandler" }, async () => {
+  const callLog: number[] = [];
+  const router = createRouter();
+  const ctx = createMockCtx("/foobar", "GET");
+  router.use(() => {
+    callLog.push(0);
+  });
+  router.use(async () => {
+    await asyncOp();
+    callLog.push(1);
+  });
+  router.get("/foobar", async () => {
+    await asyncOp();
+    callLog.push(2);
+  });
+  await router.handlerFn(ctx);
+  assertEquals(callLog, [0, 1, 2]);
+});
