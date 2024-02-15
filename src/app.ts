@@ -1,20 +1,20 @@
 import { Router, createRouter } from "@src/router.ts";
 import { Ctx, createCtx } from "@src/_ctx.ts";
 
-export type RequestHandlerFn = (ctx: Ctx) => void;
+export type RequestHandlerFn = (ctx: Ctx) => void | Promise<void>;
 export type App = ReturnType<typeof createApp>;
 
 export function createApp() {
   let appRouter: Router;
 
-  function appHandlerFn(req: Request) {
+  async function appHandlerFn(req: Request) {
     console.debug("reqUrl", req.url);
     if (!appRouter) {
       console.warn("No router present");
       return new Response(null, { status: 501 });
     }
     const ctx = createCtx(req);
-    appRouter.handlerFn(ctx);
+    await appRouter.handlerFn(ctx);
     return new Response(ctx.res.body, { status: ctx.res.status });
   }
 

@@ -8,9 +8,9 @@ export function createRoute(fns: RequestHandlerFn[]) {
     stack.push(createLayer("*", fns[i]));
   }
 
-  function handlerFn(ctx: Ctx) {
+  async function handlerFn(ctx: Ctx) {
     for (let i = 0; i < stack.length; i++) {
-      stack[i].handlerFn(ctx);
+      await stack[i].handlerFn(ctx);
     }
   }
 
