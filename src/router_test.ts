@@ -6,7 +6,6 @@ import { Method, createRouter, matchRoute } from "@src/router.ts";
 Deno.test(
   {
     name: "matchRoute()",
-    ignore: true,
   },
   async (t) => {
     const testCases = [
