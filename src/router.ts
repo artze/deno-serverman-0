@@ -3,11 +3,6 @@ import { Layer, createLayer } from "@src/_layer.ts";
 import { createRoute } from "@src/_route.ts";
 import type { RequestHandlerFn } from "@src/app.ts";
 
-type Use = {
-  (...fns: RequestHandlerFn[]): void;
-  (pathname: string, ...fns: RequestHandlerFn[]): void;
-};
-
 type MethodHandlers = {
   [key in Lowercase<Method>]: (
     pathname: string,
@@ -15,10 +10,7 @@ type MethodHandlers = {
   ) => void;
 };
 
-export type Router = {
-  handlerFn: (ctx: Ctx) => void;
-  use: Use;
-} & MethodHandlers;
+export type Router = ReturnType<typeof createRouter>;
 
 const methods = ["DELETE", "GET", "PATCH", "POST", "PUT"] as const;
 export type Method = typeof methods[number];
@@ -69,7 +61,7 @@ export function matchRoute({
   return layerPathnamePattern.test(reqUrl);
 }
 
-export function createRouter(): Router {
+export function createRouter() {
   const stack: Layer[] = [];
 
   const methodHandlers: MethodHandlers = {} as MethodHandlers;
@@ -83,7 +75,7 @@ export function createRouter(): Router {
     };
   });
 
-  function handlerFn(ctx: Ctx) {
+  async function handlerFn(ctx: Ctx) {
     for (let i = 0; i < stack.length; i++) {
       const layer = stack[i];
       if (
@@ -100,10 +92,12 @@ export function createRouter(): Router {
       }
       ctx.req.parentPathname =
         ctx.req.parentPathname + layer.pathname.replace("*", "");
-      layer.handlerFn(ctx);
+      await layer.handlerFn(ctx);
     }
   }
 
+  function use(...fns: RequestHandlerFn[]): void;
+  function use(pathname: string, ...fns: RequestHandlerFn[]): void;
   function use(
     pathnameOrFn: string | RequestHandlerFn,
     ...fns: RequestHandlerFn[]

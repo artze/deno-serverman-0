@@ -6,7 +6,6 @@ import { Method, createRouter, matchRoute } from "@src/router.ts";
 Deno.test(
   {
     name: "matchRoute()",
-    ignore: true,
   },
   async (t) => {
     const testCases = [
@@ -140,18 +139,24 @@ function createMockCtx(pathname: string, method: Method): Ctx {
   } as Ctx;
 }
 
+function asyncOp() {
+  return new Promise(function (resolve) {
+    setTimeout(resolve, 0);
+  });
+}
+
 Deno.test(
   {
     name: "router.use() without path",
   },
-  () => {
+  async () => {
     const callLog: number[] = [];
     const router = createRouter();
     const ctx = createMockCtx("/", "GET");
     router.use(() => {
       callLog.push(0);
     });
-    router.handlerFn(ctx);
+    await router.handlerFn(ctx);
     assertEquals(callLog, [0]);
   }
 );
@@ -160,14 +165,14 @@ Deno.test(
   {
     name: "router.use() with matching path",
   },
-  () => {
+  async () => {
     const callLog: number[] = [];
     const router = createRouter();
     const ctx = createMockCtx("/foobar", "GET");
     router.use("/foobar", () => {
       callLog.push(0);
     });
-    router.handlerFn(ctx);
+    await router.handlerFn(ctx);
     assertEquals(callLog, [0]);
   }
 );
@@ -176,14 +181,14 @@ Deno.test(
   {
     name: "router.use() with non-matching path",
   },
-  () => {
+  async () => {
     const callLog: number[] = [];
     const router = createRouter();
     const ctx = createMockCtx("/", "GET");
     router.use("/foobar", () => {
       callLog.push(0);
     });
-    router.handlerFn(ctx);
+    await router.handlerFn(ctx);
     assertEquals(callLog, []);
   }
 );
@@ -192,7 +197,7 @@ Deno.test(
   {
     name: "router.post() with match",
   },
-  () => {
+  async () => {
     const callLog: number[] = [];
     const router = createRouter();
     const ctx = createMockCtx("/foobar", "POST");
@@ -202,7 +207,7 @@ Deno.test(
     router.get("/foobar", () => {
       callLog.push(1);
     });
-    router.handlerFn(ctx);
+    await router.handlerFn(ctx);
     assertEquals(callLog, [0]);
   }
 );
@@ -211,7 +216,7 @@ Deno.test(
   {
     name: "router.put() with match",
   },
-  () => {
+  async () => {
     const callLog: number[] = [];
     const router = createRouter();
     const ctx = createMockCtx("/foobar", "PUT");
@@ -221,7 +226,7 @@ Deno.test(
     router.get("/foobar", () => {
       callLog.push(1);
     });
-    router.handlerFn(ctx);
+    await router.handlerFn(ctx);
     assertEquals(callLog, [0]);
   }
 );
@@ -230,7 +235,7 @@ Deno.test(
   {
     name: "router.patch() with match",
   },
-  () => {
+  async () => {
     const callLog: number[] = [];
     const router = createRouter();
     const ctx = createMockCtx("/foobar", "PATCH");
@@ -240,7 +245,7 @@ Deno.test(
     router.get("/foobar", () => {
       callLog.push(1);
     });
-    router.handlerFn(ctx);
+    await router.handlerFn(ctx);
     assertEquals(callLog, [0]);
   }
 );
@@ -249,7 +254,7 @@ Deno.test(
   {
     name: "router.delete() with match",
   },
-  () => {
+  async () => {
     const callLog: number[] = [];
     const router = createRouter();
     const ctx = createMockCtx("/foobar", "DELETE");
@@ -259,7 +264,7 @@ Deno.test(
     router.get("/foobar", () => {
       callLog.push(1);
     });
-    router.handlerFn(ctx);
+    await router.handlerFn(ctx);
     assertEquals(callLog, [0]);
   }
 );
@@ -268,7 +273,7 @@ Deno.test(
   {
     name: "router with multiple matches",
   },
-  () => {
+  async () => {
     const callLog: number[] = [];
     const router = createRouter();
     const ctx = createMockCtx("/foobar", "GET");
@@ -284,7 +289,7 @@ Deno.test(
     router.get("/foo", () => {
       callLog.push(3);
     });
-    router.handlerFn(ctx);
+    await router.handlerFn(ctx);
     assertEquals(callLog, [0, 1, 2]);
   }
 );
@@ -293,7 +298,7 @@ Deno.test(
   {
     name: "router with sub-routers and multiple matches",
   },
-  () => {
+  async () => {
     const callLog: number[] = [];
     const router = createRouter();
     const subRouter = createRouter();
@@ -311,7 +316,26 @@ Deno.test(
       callLog.push(3);
     });
     router.use("/foobar", subRouter.handlerFn);
-    router.handlerFn(ctx);
+    await router.handlerFn(ctx);
     assertEquals(callLog, [0, 1, 3]);
   }
 );
+
+Deno.test({ name: "router with async requestHandler" }, async () => {
+  const callLog: number[] = [];
+  const router = createRouter();
+  const ctx = createMockCtx("/foobar", "GET");
+  router.use(() => {
+    callLog.push(0);
+  });
+  router.use(async () => {
+    await asyncOp();
+    callLog.push(1);
+  });
+  router.get("/foobar", async () => {
+    await asyncOp();
+    callLog.push(2);
+  });
+  await router.handlerFn(ctx);
+  assertEquals(callLog, [0, 1, 2]);
+});
