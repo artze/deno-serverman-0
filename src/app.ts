@@ -1,7 +1,10 @@
 import { Router, createRouter } from "@src/router.ts";
 import { Ctx, createCtx } from "@src/_ctx.ts";
 
-export type RequestHandlerFn = (ctx: Ctx) => void | Promise<void>;
+export type RequestHandlerFn = (
+  ctx: Ctx,
+  next: () => Promise<void>
+) => void | Promise<void>;
 export type App = ReturnType<typeof createApp>;
 
 export function createApp() {

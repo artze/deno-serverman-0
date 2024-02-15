@@ -79,25 +79,34 @@ export function createRouter() {
     };
   });
 
+  /**
+   * TODO What happens if no match found?
+   */
   async function handlerFn(ctx: Ctx) {
-    for (let i = 0; i < stack.length; i++) {
-      const layer = stack[i];
-      if (
-        !matchRoute({
-          layerPathname: layer.pathname,
-          parentPathname: ctx.req.parentPathname,
-          reqUrl: ctx.req.url,
-        })
-      ) {
-        continue;
+    let currentIdx = -1;
+    async function next() {
+      while (currentIdx < stack.length) {
+        currentIdx++;
+        const layer = stack[currentIdx];
+        if (
+          !matchRoute({
+            layerPathname: layer.pathname,
+            parentPathname: ctx.req.parentPathname,
+            reqUrl: ctx.req.url,
+          })
+        ) {
+          continue;
+        }
+        if (layer.method && ctx.req.method.toUpperCase() !== layer.method) {
+          continue;
+        }
+        ctx.req.parentPathname =
+          ctx.req.parentPathname + layer.pathname.replace(/\*{1,2}/, "");
+        await layer.handlerFn(ctx, next);
+        break;
       }
-      if (layer.method && ctx.req.method.toUpperCase() !== layer.method) {
-        continue;
-      }
-      ctx.req.parentPathname =
-        ctx.req.parentPathname + layer.pathname.replace(/\*{1,2}/, "");
-      await layer.handlerFn(ctx);
     }
+    await next();
   }
 
   function use(...fns: RequestHandlerFn[]): void;
