@@ -289,8 +289,12 @@ Deno.test(
     router.get("/foo", () => {
       callLog.push(3);
     });
+    /** Simulate catch-all app.use() */
+    router.use("*", () => {
+      callLog.push(4);
+    });
     await router.handlerFn(ctx);
-    assertEquals(callLog, [0, 1, 2]);
+    assertEquals(callLog, [0, 1, 2, 4]);
   }
 );
 
