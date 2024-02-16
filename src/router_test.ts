@@ -380,3 +380,28 @@ Deno.test(
     assertEquals(callLog, [0, 1, 2]);
   }
 );
+
+Deno.test({ name: "router control flow with next()" }, async () => {
+  const callLog: number[] = [];
+  const router = createRouter();
+  const subRouter = createRouter();
+  const ctx = createMockCtx("/foobar", "GET");
+  router.use(async (_ctx, next) => {
+    callLog.push(0);
+    await next();
+    callLog.push(5);
+  });
+  subRouter.use(async (_ctx, next) => {
+    callLog.push(1);
+    await next();
+    callLog.push(4);
+  });
+  subRouter.get("/", async (_ctx, next) => {
+    callLog.push(2);
+    await next();
+    callLog.push(3);
+  });
+  router.use("/foobar", subRouter.handlerFn);
+  await router.handlerFn(ctx);
+  assertEquals(callLog, [0, 1, 2, 3, 4, 5]);
+});
