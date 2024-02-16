@@ -354,3 +354,28 @@ Deno.test({ name: "router with async requestHandler" }, async () => {
   await router.handlerFn(ctx);
   assertEquals(callLog, [0, 1, 2]);
 });
+
+Deno.test(
+  { name: "register middleware of parent router after sub-router" },
+  async () => {
+    const callLog: number[] = [];
+    const router = createRouter();
+    const subRouter = createRouter();
+    const ctx = createMockCtx("/foobar", "GET");
+    subRouter.use(async (_ctx, next) => {
+      callLog.push(0);
+      await next();
+    });
+    subRouter.get("/", async (_ctx, next) => {
+      callLog.push(1);
+      await next();
+    });
+    router.use("/foobar", subRouter.handlerFn);
+    router.use(async (_ctx, next) => {
+      callLog.push(2);
+      await next();
+    });
+    await router.handlerFn(ctx);
+    assertEquals(callLog, [0, 1, 2]);
+  }
+);
