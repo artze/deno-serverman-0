@@ -79,14 +79,14 @@ export function createRouter() {
     };
   });
 
-  /**
-   * TODO What happens if no match found?
-   */
-  async function handlerFn(ctx: Ctx) {
+  async function handlerFn(ctx: Ctx, outerNext?: () => Promise<void>) {
     let currentIdx = -1;
     async function next() {
       while (currentIdx < stack.length) {
         currentIdx++;
+        if (currentIdx === stack.length) {
+          break;
+        }
         const layer = stack[currentIdx];
         if (
           !matchRoute({
@@ -104,6 +104,15 @@ export function createRouter() {
           ctx.req.parentPathname + layer.pathname.replace(/\*{1,2}/, "");
         await layer.handlerFn(ctx, next);
         break;
+      }
+      /**
+       * We have reached the end of stack, invoke next()
+       * of outer stack
+       */
+      if (currentIdx === stack.length) {
+        if (outerNext) {
+          await outerNext();
+        }
       }
     }
     await next();

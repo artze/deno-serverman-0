@@ -9,9 +9,19 @@ export function createRoute(fns: RequestHandlerFn[]) {
   }
 
   async function handlerFn(ctx: Ctx) {
-    for (let i = 0; i < stack.length; i++) {
-      await stack[i].handlerFn(ctx);
+    let currentIdx = -1;
+    async function next() {
+      while (currentIdx < stack.length) {
+        currentIdx++;
+        if (currentIdx === stack.length) {
+          break;
+        }
+        const layer = stack[currentIdx];
+        await layer.handlerFn(ctx, next);
+        break;
+      }
     }
+    await next();
   }
 
   return {
