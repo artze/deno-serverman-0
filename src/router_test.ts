@@ -277,17 +277,21 @@ Deno.test(
     const callLog: number[] = [];
     const router = createRouter();
     const ctx = createMockCtx("/foobar", "GET");
-    router.use(() => {
+    router.use(async (_ctx, next) => {
       callLog.push(0);
+      await next();
     });
-    router.use("/foobar", () => {
+    router.use("/foobar", async (_ctx, next) => {
       callLog.push(1);
+      await next();
     });
-    router.get("/foobar", () => {
+    router.get("/foobar", async (_ctx, next) => {
       callLog.push(2);
+      await next();
     });
-    router.get("/foo", () => {
+    router.get("/foo", async (_ctx, next) => {
       callLog.push(3);
+      await next();
     });
     /** Simulate catch-all app.use() */
     router.use("*", () => {
@@ -307,17 +311,21 @@ Deno.test(
     const router = createRouter();
     const subRouter = createRouter();
     const ctx = createMockCtx("/foobar/sub", "GET");
-    router.use(() => {
+    router.use(async (_ctx, next) => {
       callLog.push(0);
+      await next();
     });
-    subRouter.use(() => {
+    subRouter.use(async (_ctx, next) => {
       callLog.push(1);
+      await next();
     });
-    subRouter.use("/abc", () => {
+    subRouter.use("/abc", async (_ctx, next) => {
       callLog.push(2);
+      await next();
     });
-    subRouter.get("/sub", () => {
+    subRouter.get("/sub", async (_ctx, next) => {
       callLog.push(3);
+      await next();
     });
     router.use("/foobar", subRouter.handlerFn);
     await router.handlerFn(ctx);
@@ -329,17 +337,71 @@ Deno.test({ name: "router with async requestHandler" }, async () => {
   const callLog: number[] = [];
   const router = createRouter();
   const ctx = createMockCtx("/foobar", "GET");
-  router.use(() => {
+  router.use(async (_ctx, next) => {
     callLog.push(0);
+    await next();
   });
-  router.use(async () => {
+  router.use(async (_ctx, next) => {
     await asyncOp();
     callLog.push(1);
+    await next();
   });
-  router.get("/foobar", async () => {
+  router.get("/foobar", async (_ctx, next) => {
     await asyncOp();
     callLog.push(2);
+    await next();
   });
   await router.handlerFn(ctx);
   assertEquals(callLog, [0, 1, 2]);
+});
+
+Deno.test(
+  { name: "router.use() catch-all after mw with specific paths" },
+  async () => {
+    const callLog: number[] = [];
+    const router = createRouter();
+    const subRouter = createRouter();
+    const ctx = createMockCtx("/foobar", "GET");
+    subRouter.use(async (_ctx, next) => {
+      callLog.push(0);
+      await next();
+    });
+    subRouter.get("/", async (_ctx, next) => {
+      callLog.push(1);
+      await next();
+    });
+    router.use("/foobar", subRouter.handlerFn);
+    /** Simulate catch-all app.use() */
+    router.use("*", async (_ctx, next) => {
+      callLog.push(2);
+      await next();
+    });
+    await router.handlerFn(ctx);
+    assertEquals(callLog, [0, 1, 2]);
+  }
+);
+
+Deno.test({ name: "router control flow with next()" }, async () => {
+  const callLog: number[] = [];
+  const router = createRouter();
+  const subRouter = createRouter();
+  const ctx = createMockCtx("/foobar", "GET");
+  router.use(async (_ctx, next) => {
+    callLog.push(0);
+    await next();
+    callLog.push(5);
+  });
+  subRouter.use(async (_ctx, next) => {
+    callLog.push(1);
+    await next();
+    callLog.push(4);
+  });
+  subRouter.get("/", async (_ctx, next) => {
+    callLog.push(2);
+    await next();
+    callLog.push(3);
+  });
+  router.use("/foobar", subRouter.handlerFn);
+  await router.handlerFn(ctx);
+  assertEquals(callLog, [0, 1, 2, 3, 4, 5]);
 });
