@@ -34,7 +34,7 @@ export function createApp() {
     if (typeof pathnameOrFn === "string") {
       appRouter.use(pathnameOrFn, ...fns);
     } else {
-      appRouter.use(pathnameOrFn, ...fns);
+      appRouter.use("*", pathnameOrFn, ...fns);
     }
   }
 

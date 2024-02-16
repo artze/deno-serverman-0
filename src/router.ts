@@ -30,9 +30,13 @@ export function matchRoute({
   parentPathname: string;
   reqUrl: string;
 }): boolean {
-  const strMatchResult = layerPathname.match(/([^*]*)(\*$)?/);
+  const strMatchResult = layerPathname.match(/([^*]*)(\*{1,2}$)?/);
   if (!strMatchResult) {
     throw new Error("layerPathname cannot be parsed");
+  }
+  /** catch-all app.use() registered, always return true */
+  if (layerPathname === "**") {
+    return true;
   }
   const [, layerPathnameWithoutAsterisk, asterisk] = strMatchResult;
   const layerPathnameArr = layerPathnameWithoutAsterisk
@@ -91,7 +95,7 @@ export function createRouter() {
         continue;
       }
       ctx.req.parentPathname =
-        ctx.req.parentPathname + layer.pathname.replace("*", "");
+        ctx.req.parentPathname + layer.pathname.replace(/\*{1,2}/, "");
       await layer.handlerFn(ctx);
     }
   }
