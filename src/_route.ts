@@ -8,7 +8,7 @@ export function createRoute(fns: RequestHandlerFn[]) {
     stack.push(createLayer("*", fns[i]));
   }
 
-  async function handlerFn(ctx: Ctx) {
+  async function handlerFn(ctx: Ctx, outerNext: () => Promise<void>) {
     let currentIdx = -1;
     async function next() {
       while (currentIdx < stack.length) {
@@ -19,6 +19,13 @@ export function createRoute(fns: RequestHandlerFn[]) {
         const layer = stack[currentIdx];
         await layer.handlerFn(ctx, next);
         break;
+      }
+      /**
+       * We have reached the end of stack, invoke next()
+       * of outer stack
+       */
+      if (currentIdx === stack.length) {
+        await outerNext();
       }
     }
     await next();
