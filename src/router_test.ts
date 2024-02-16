@@ -356,7 +356,7 @@ Deno.test({ name: "router with async requestHandler" }, async () => {
 });
 
 Deno.test(
-  { name: "register middleware of parent router after sub-router" },
+  { name: "router.use() catch-all after mw with specific paths" },
   async () => {
     const callLog: number[] = [];
     const router = createRouter();
@@ -371,7 +371,8 @@ Deno.test(
       await next();
     });
     router.use("/foobar", subRouter.handlerFn);
-    router.use(async (_ctx, next) => {
+    /** Simulate catch-all app.use() */
+    router.use("*", async (_ctx, next) => {
       callLog.push(2);
       await next();
     });
