@@ -102,8 +102,7 @@ export function createRouter() {
         }
         ctx.req.parentPathname =
           ctx.req.parentPathname + layer.pathname.replace(/\*{1,2}/, "");
-        await layer.handlerFn(ctx, next);
-        break;
+        return await layer.handlerFn(ctx, next);
       }
       /**
        * We have reached the end of stack, invoke next()

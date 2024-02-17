@@ -17,8 +17,7 @@ export function createRoute(fns: RequestHandlerFn[]) {
           break;
         }
         const layer = stack[currentIdx];
-        await layer.handlerFn(ctx, next);
-        break;
+        return await layer.handlerFn(ctx, next);
       }
       /**
        * We have reached the end of stack, invoke next()
