@@ -31,7 +31,7 @@ export function createApp() {
   }
 
   function listen({ port }: { port: number }) {
-    Deno.serve({ port }, appHandlerFn);
+    return Deno.serve({ port }, appHandlerFn);
   }
 
   function use(...fns: RequestHandlerFn[]): void;
