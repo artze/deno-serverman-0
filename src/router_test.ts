@@ -1,7 +1,8 @@
 import { assertEquals } from "@src/deps.ts";
 
 import type { Ctx } from "@src/_ctx.ts";
-import { Method, createRouter, matchRoute } from "@src/router.ts";
+import type { HttpMethod } from "@src/_http_methods.ts";
+import { createRouter, matchRoute } from "@src/router.ts";
 
 Deno.test(
   {
@@ -128,7 +129,7 @@ Deno.test(
   }
 );
 
-function createMockCtx(pathname: string, method: Method): Ctx {
+function createMockCtx(pathname: string, method: HttpMethod): Ctx {
   return {
     req: {
       method,

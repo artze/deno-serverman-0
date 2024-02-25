@@ -6,6 +6,6 @@
     "dev": "deno run --allow-net --watch consumer.ts",
     "dl-deps:update-lock": "deno cache --lock=deno.lock --lock-write src/deps.ts",
     "dl-deps:reload": "deno cache --reload --lock=deno.lock src/deps.ts",
-    "test": "deno test --allow-net"
+    "test": "deno test --allow-net --quiet"
   }
 }
