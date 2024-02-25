@@ -4,12 +4,9 @@ import { createTestServer } from "@src/_test_util.ts";
 import { createApp } from "@src/app.ts";
 import { createRouter } from "@src/router.ts";
 
-/**
- * Test response creation
- */
 Deno.test(
   {
-    name: "No matching path",
+    name: "res.status when no matching path",
   },
   async () => {
     const app = createApp();
@@ -26,7 +23,7 @@ Deno.test(
 
 Deno.test(
   {
-    name: "Status code set within middleware",
+    name: "res.status when status code set within middleware",
   },
   async () => {
     const app = createApp();
@@ -43,7 +40,7 @@ Deno.test(
 
 Deno.test(
   {
-    name: "Status code unset but res body is set",
+    name: "res.status when status code unset but res body is set within middleware",
   },
   async () => {
     const app = createApp();
@@ -60,7 +57,7 @@ Deno.test(
 
 Deno.test(
   {
-    name: "Both status code and res body unset",
+    name: "res.status when both status code and res body unset",
   },
   async () => {
     const app = createApp();
