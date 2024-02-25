@@ -30,8 +30,14 @@ export function createApp() {
     return createResponse(ctx);
   }
 
-  function listen({ port }: { port: number }) {
-    return Deno.serve({ port }, appHandlerFn);
+  function listen({
+    port,
+    onListen,
+  }: {
+    port: number;
+    onListen?: ({ hostname, port }: { hostname: string; port: number }) => void;
+  }) {
+    return Deno.serve({ port, onListen }, appHandlerFn);
   }
 
   function use(...fns: RequestHandlerFn[]): void;
