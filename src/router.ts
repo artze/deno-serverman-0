@@ -1,19 +1,17 @@
 import { Ctx } from "@src/_ctx.ts";
 import { Layer, createLayer } from "@src/_layer.ts";
 import { createRoute } from "@src/_route.ts";
+import { HttpMethod, httpMethods } from "@src/_http_methods.ts";
 import type { RequestHandlerFn } from "@src/app.ts";
 
 type MethodHandlers = {
-  [key in Lowercase<Method>]: (
+  [key in Lowercase<HttpMethod>]: (
     pathname: string,
     ...fns: RequestHandlerFn[]
   ) => void;
 };
 
 export type Router = ReturnType<typeof createRouter>;
-
-const methods = ["DELETE", "GET", "PATCH", "POST", "PUT"] as const;
-export type Method = typeof methods[number];
 
 /**
  * TODO
@@ -69,8 +67,8 @@ export function createRouter() {
   const stack: Layer[] = [];
 
   const methodHandlers: MethodHandlers = {} as MethodHandlers;
-  methods.forEach((m) => {
-    methodHandlers[m.toLowerCase() as Lowercase<Method>] = function (
+  httpMethods.forEach((m) => {
+    methodHandlers[m.toLowerCase() as Lowercase<HttpMethod>] = function (
       pathname: string,
       ...fns: RequestHandlerFn[]
     ) {
