@@ -7,6 +7,15 @@ export type RequestHandlerFn = (
 ) => void | Promise<void>;
 export type App = ReturnType<typeof createApp>;
 
+function createResponse(ctx: Ctx): Response {
+  const status = ctx.res.status
+    ? ctx.res.status
+    : ctx.res.body === undefined
+    ? 404
+    : 200;
+  return new Response(ctx.res.body, { status });
+}
+
 export function createApp() {
   let appRouter: Router;
 
@@ -18,11 +27,11 @@ export function createApp() {
     }
     const ctx = createCtx(req);
     await appRouter.handlerFn(ctx);
-    return new Response(ctx.res.body, { status: ctx.res.status });
+    return createResponse(ctx);
   }
 
   function listen({ port }: { port: number }) {
-    Deno.serve({ port }, appHandlerFn);
+    return Deno.serve({ port }, appHandlerFn);
   }
 
   function use(...fns: RequestHandlerFn[]): void;
